@@ -225,3 +225,7 @@ __marimo__/
 .idea/
 data/images/
 docs/*.pdf
+# Modelos podem ser reproduzidos pelo código e não são versionados
+*.keras
+# Arquivo de trabalho do treino atual; cada treino é arquivado em models/runs/
+models/training_log.csv
