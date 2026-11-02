@@ -146,3 +146,17 @@ Ainda não testadas:
 
 - **BatchNorm:** o momentum padrão de 0,99 atualiza devagar as estatísticas usadas na validação, com cerca de 55 lotes por epoch. Isso pode explicar a diferença entre treino e validação. Testar `momentum=0.9`.
 - **Early stopping:** aumentar a patience ou impedir a parada nas primeiras epochs, com `start_from_epoch`.
+
+## Treino 3 (02/11/2026)
+
+**Situação:** em andamento.
+
+### Mudanças em relação ao Treino 2
+
+| Item | Treino 2 | Treino 3 |
+|---|---|---|
+| `momentum` do BatchNorm | 0,99 (padrão) | 0,9 |
+| Early stopping | Considera todas as epochs | `start_from_epoch=15` |
+| Modelo salvo ao final | Melhor checkpoint | Mesmo modelo avaliado no notebook |
+
+Os pesos de classe limitados a 10 e o `learning_rate` inicial de 0,0003 continuam iguais.
