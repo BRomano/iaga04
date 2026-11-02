@@ -94,7 +94,7 @@ A escolha de configurações deve usar apenas a validação, para que o gold con
 
 ## Treino 2 (02/11/2026)
 
-**Situação:** em andamento.
+**Resultado:** treino sem utilidade. O early stopping restaurou a epoch 1, e o modelo prevê uma única classe em cada alvo. Este treino não mostra se as mudanças ajudam, porque parou cedo demais.
 
 ### Mudanças em relação ao Treino 1
 
@@ -104,3 +104,45 @@ A escolha de configurações deve usar apenas a validação, para que o gold con
 | `learning_rate` inicial | 0,001 | 0,0003 |
 | Registro por epoch | Nenhum | `CSVLogger` em `models/training_log.csv` |
 | Métricas de validação | Accuracy por alvo | Também accuracy, linha de base e Kappa só nas imagens avaliáveis |
+
+Código: commit `7f7e378`. O restante da configuração é igual ao do Treino 1. O registro por epoch está em `models/runs/treino2/training_log.csv`.
+
+### Execução
+
+- **Duração:** cerca de 13 minutos em CPU, incluindo as demais células do notebook.
+- **Epochs:** parou por early stopping na epoch 9; os pesos restaurados são os da epoch 1.
+- **Melhor `val_loss`:** 4,451 (epoch 1).
+- **Variação da `val_loss`:** de 4,451 a 7,548 ao longo do treino.
+- **Loss de treino:** caiu de 4,581 na epoch 1 para 2,887 na epoch 9.
+
+### Validação (silver, epoch 1, imagens avaliáveis)
+
+| Alvo | Imagens | Accuracy | Linha de base | Kappa quadrático |
+|---|---|---|---|---|
+| EXP | 301 | 0,558 | 0,558 | 0,000 |
+| ICM | 251 | 0,016 | 0,805 | 0,000 |
+| TE | 251 | 0,307 | 0,665 | 0,000 |
+
+### Teste (gold)
+
+| Alvo | Imagens | Accuracy | Kappa quadrático | Classe prevista em todas as imagens |
+|---|---|---|---|---|
+| EXP | 298 | 0,513 | 0,000 | 3 |
+| ICM | 238 | 0,071 | 0,000 | 2 |
+| TE | 234 | 0,350 | 0,000 | 1 |
+
+A classe prevista foi deduzida do relatório por classe, com recall de 1,00 nessa classe e 0,00 nas demais.
+
+### Conclusões
+
+1. **O modelo restaurado não aprendeu.** Ele vem da epoch 1 e prevê sempre a mesma classe em cada alvo, por isso o Kappa é 0.
+2. **As mudanças não foram avaliadas de fato.** O treino parou 8 epochs depois da primeira, enquanto o modelo ainda aprendia. O Treino 1 só atingiu sua melhor `val_loss` na epoch 25.
+3. **O treino avançou mais rápido que no Treino 1.** Na epoch 9, a accuracy de treino foi de 0,497, 0,590 e 0,502 (EXP, ICM, TE), contra 0,422, 0,425 e 0,450 no Treino 1. A medida usa pesos e augmentação, então serve apenas como indicação.
+4. **Treino e validação se comportam de formas muito diferentes.** Até a epoch 5, a accuracy de treino subiu para cerca de 0,45 a 0,53, enquanto a de validação ficou fixa em poucos valores, como 0,090 em EXP e 0,023 em TE.
+
+### Hipóteses para o próximo treino
+
+Ainda não testadas:
+
+- **BatchNorm:** o momentum padrão de 0,99 atualiza devagar as estatísticas usadas na validação, com cerca de 55 lotes por epoch. Isso pode explicar a diferença entre treino e validação. Testar `momentum=0.9`.
+- **Early stopping:** aumentar a patience ou impedir a parada nas primeiras epochs, com `start_from_epoch`.

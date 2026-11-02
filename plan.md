@@ -38,7 +38,7 @@ Acompanhamento da implementação descrita em `spec.md`.
 
 ## Status atual
 
-Treino 1 concluído, com resultados em `history_train.md`. Treino 2 em andamento, com pesos de classe limitados a 10, `learning_rate=3e-4` e `CSVLogger`. Ao terminar, revisar outputs e registrar os resultados em `history_train.md`.
+Treinos 1 e 2 concluídos, com resultados em `history_train.md`. Nenhum dos dois gerou um modelo útil para ICM e TE; o melhor até agora é o do Treino 1, por causa de EXP.
 
 ## Pendências de entrega
 
