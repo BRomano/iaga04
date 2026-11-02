@@ -65,7 +65,7 @@ Redes sem camadas intermediárias só resolvem superfícies de erro em formato d
 
 ## 9. Algoritmo geral do backpropagation
 1. Escolher aleatoriamente parâmetros iniciais θ (pesos W e taxa η)
-2. Estabelecer critério de parada (épocas máximas Kmax, ou erro E(W) ≤ λ)
+2. Estabelecer critério de parada (epochs máximas Kmax, ou erro E(W) ≤ λ)
 3. Calcular os erros δ de saída e das camadas ocultas
 4. Atualizar os parâmetros Δw
 5. Recalcular todos os pesos `W(1) = W(0) + ΔW` e retornar ao passo 3 até o critério de parada

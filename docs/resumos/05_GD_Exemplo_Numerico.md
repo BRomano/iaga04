@@ -64,4 +64,4 @@ b₃ = 0,32 − 0,1·(−4,36) = 0,756
 | 3 | 1,796 | 0,756 | — |
 
 ## Conclusão
-O algoritmo segue atualizando peso e bias iterativamente até atingir um critério de parada: **número máximo de iterações (épocas)** ou **erro abaixo de um limiar aceitável**. Nota-se que a perda não decresce de forma estritamente monótona a cada iteração individual (w oscila entre 2,3 e 0,78), mas a tendência geral com α adequado é de convergência.
+O algoritmo segue atualizando peso e bias iterativamente até atingir um critério de parada: **número máximo de iterações (epochs)** ou **erro abaixo de um limiar aceitável**. Nota-se que a perda não decresce de forma estritamente monótona a cada iteração individual (w oscila entre 2,3 e 0,78), mas a tendência geral com α adequado é de convergência.

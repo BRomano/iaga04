@@ -10,10 +10,10 @@ Acompanhamento da implementação descrita em `spec.md`.
 4. **Notebook `gardner_cnn.ipynb`** — criado com as 12 seções descritas em `spec.md` (setup, exploração, split por embrião, pipelines `tf.data`, modelo multi-saída, compilação, callbacks, treino, curvas, avaliação validação, avaliação gold, conclusões). ✅ Concluído.
 5. **Smoke tests isolados (fora do notebook)** — antes de rodar o notebook completo, validados em script Python avulso:
    - Pipeline `tf.data` carrega lotes com shapes corretos. ✅
-   - `model.fit` com 1 época roda sem erro em lote pequeno. ✅
+   - `model.fit` com 1 epoch roda sem erro em lote pequeno. ✅
    - Descoberto e corrigido bug do Keras 3: `y`/`sample_weight` como **dicts** nomeados quebra `model.fit` com `KeyError` interno; solução foi usar **tuplas** na ordem das saídas (EXP, ICM, TE) e compilar com `loss`/`metrics` como listas. ✅ Corrigido no notebook.
-   - 1 época no split completo real (sem subamostragem) roda sem erro, ~88s/época em CPU. ✅
-6. **Execução completa do notebook** (`jupyter nbconvert --to notebook --execute --inplace`) — 🔄 **refeita após as correções de 02/11/2026** (ver abaixo), rodando até 60 épocas com `EarlyStopping` (patience=8). Estimativa: até ~90 min se rodar todas as 60 épocas; pode terminar antes por early stopping. A execução anterior não deixou métricas no notebook, e o modelo dela foi treinado com os bugs corrigidos abaixo.
+   - 1 epoch no split completo real (sem subamostragem) roda sem erro, ~88s/epoch em CPU. ✅
+6. **Execução completa do notebook** (`jupyter nbconvert --to notebook --execute --inplace`) — 🔄 **refeita após as correções de 02/11/2026** (ver abaixo), rodando até 60 epochs com `EarlyStopping` (patience=8). Estimativa: até ~90 min se rodar todas as 60 epochs; pode terminar antes por early stopping. A execução anterior não deixou métricas no notebook, e o modelo dela foi treinado com os bugs corrigidos abaixo.
 7. **Verificação final** (pendente, após a etapa 6 terminar):
    - Conferir que todas as células do notebook executaram sem erro.
    - Conferir `model.summary()` e curvas de treino geradas.
@@ -34,11 +34,11 @@ Acompanhamento da implementação descrita em `spec.md`.
 - Métricas do gold separadas entre embriões presentes no silver e inéditos.
 - Classe 3 de ICM/TE documentada como não determinado e verificada no notebook.
 - Conclusões reescritas para não afirmar resultados antes de eles existirem.
-- Teste com 1 época em cópia do notebook: as 17 células de código executaram sem erro.
+- Teste com 1 epoch em cópia do notebook: as 17 células de código executaram sem erro.
 
 ## Status atual
 
-Aguardando a execução completa do notebook (etapa 6). Ao terminar, revisar outputs e reportar métricas finais no conjunto gold.
+Treino 1 concluído, com resultados em `history_train.md`. Treino 2 em andamento, com pesos de classe limitados a 10, `learning_rate=3e-4` e `CSVLogger`. Ao terminar, revisar outputs e registrar os resultados em `history_train.md`.
 
 ## Pendências de entrega
 

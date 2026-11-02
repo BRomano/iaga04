@@ -59,9 +59,9 @@ Input (168,224,3)  # altura, largura, canais
 ```
 
 - **Loss:** `sparse_categorical_crossentropy` em cada cabeça, `loss_weights` iguais (1.0 cada).
-- **Class weights:** calculados por alvo (`compute_class_weight`) e convertidos em `sample_weight` por amostra em cada saída (Keras multi-output não aceita `class_weight` dict diretamente). Usados só no treino; a validação não tem pesos, para que a `val_loss` não fique dominada por poucas imagens raras (ICM=2 tem só 4 imagens na validação).
-- **Otimizador:** Adam (lr=1e-3).
-- **Callbacks:** `EarlyStopping` (patience=8, restore_best_weights), `ReduceLROnPlateau`, `ModelCheckpoint` salvando o melhor modelo em `models/gardner_cnn.keras`.
+- **Class weights:** calculados por alvo (`compute_class_weight`) e convertidos em `sample_weight` por amostra em cada saída (Keras multi-output não aceita `class_weight` dict diretamente). Limitados a no máximo 10, para que uma única imagem rara não domine o lote. Usados só no treino; a validação não tem pesos, para que a `val_loss` não fique dominada por poucas imagens raras (ICM=2 tem só 4 imagens na validação).
+- **Otimizador:** Adam (lr=3e-4).
+- **Callbacks:** `EarlyStopping` (patience=8, restore_best_weights), `ReduceLROnPlateau`, `ModelCheckpoint` salvando o melhor modelo em `models/gardner_cnn.keras`, `CSVLogger` salvando as métricas de cada epoch em `models/training_log.csv`.
 
 ### Nota de implementação (Keras 3)
 
@@ -69,8 +69,8 @@ Passar `y` e `sample_weight` como **dicts** nomeados por saída, combinados num 
 
 ## Avaliação
 
-- Curvas de treino/validação (loss total e por cabeça, accuracy por cabeça) ao longo das épocas.
-- No conjunto de validação (silver, mesma distribuição do treino): accuracy por alvo.
+- Curvas de treino/validação (loss total e por cabeça, accuracy por cabeça) ao longo das epochs.
+- No conjunto de validação (silver, mesma distribuição do treino): accuracy por alvo e, nas imagens avaliáveis (sem a classe 3 em ICM/TE), accuracy, linha de base e Kappa quadrático.
 - No conjunto de teste **gold** (benchmark real, com filtragem de `ND`/NaN por coluna):
   - Accuracy por alvo
   - Matriz de confusão (matplotlib)

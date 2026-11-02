@@ -52,7 +52,7 @@ Dado um conjunto `Ψ = {(x_l^d, y_l^d)}`, o objetivo é encontrar função `h` q
 1. Iniciar pesos aleatórios (W)
 2. Para cada par (X, d): calcular saída O e erro E
 3. Se erro > tolerância ε: atualizar `W_novo = W_anterior + η·E·X`
-4. Repetir até erro aceitável ou número máximo de épocas
+4. Repetir até erro aceitável ou número máximo de epochs
 
 `η` (taxa de aprendizado) controla a velocidade do ajuste.
 
