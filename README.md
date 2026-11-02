@@ -14,4 +14,4 @@ python -m venv .venv
 .venv/bin/python -m jupyter lab gardner_cnn.ipynb
 ```
 
-Dados: Kromp et al. (2023, *Sci Data*), em `data/`.
+Dados: Kromp et al. (2023, *Sci Data*). Os CSVs de rótulos estão versionados em `data/`; as imagens não são versionadas e devem ser colocadas em `data/images/`.

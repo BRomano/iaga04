@@ -223,5 +223,5 @@ __marimo__/
 .claude/
 .venv/
 .idea/
-data/
+data/images/
 docs/*.pdf
