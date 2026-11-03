@@ -225,3 +225,88 @@ O número entre parênteses é a quantidade de imagens da classe.
 5. **Nenhum alvo supera a linha de base em accuracy.** A escolha entre os modelos depende da métrica: o Treino 1 é melhor em accuracy de EXP, e o Treino 3 é melhor em todos os Kappas e na accuracy de ICM.
 6. **ICM=2 continua sem acerto.** A recall foi 0,00 nas 17 imagens, mesmo com o peso de classe de 10.
 7. **Embriões inéditos ficam um pouco abaixo em ICM e TE.** O subconjunto é pequeno, então isso não é conclusivo.
+
+## Treino 4 (02/11/2026)
+
+**Resultado:** o melhor modelo até agora, em Kappa nos três alvos e em accuracy. EXP tem boa concordância com o gold, e TE melhorou bastante. ICM segue abaixo da linha de base em accuracy.
+
+### Mudanças em relação ao Treino 3
+
+| Item | Treino 3 | Treino 4 |
+|---|---|---|
+| Backbone | CNN do zero, com 7 convoluções | EfficientNetB0 pré-treinada no ImageNet e congelada |
+| Pesos treináveis | Todos | 331.277 de cerca de 4,4 milhões |
+| Entrada do backbone | Pixels de 0 a 1 | Reescalada para 0 a 255 |
+
+Pesos de classe limitados a 10, `learning_rate` inicial de 0,0003, `start_from_epoch=15`, separação por embrião e augmentação continuam iguais. O registro por epoch está em `models/runs/treino4/training_log.csv`.
+
+### Execução
+
+- **Duração:** cerca de 17 minutos em CPU, incluindo as demais células do notebook.
+- **Epochs:** parou por early stopping na epoch 46; os pesos restaurados são os da epoch 38.
+- **Melhor `val_loss`:** 2,285 (epoch 38), a menor entre os quatro treinos.
+- **Variação da `val_loss`:** de 2,285 a 3,192, bem mais estável que nos treinos anteriores.
+- **Loss de treino:** caiu de 3,592 na epoch 1 para 1,457 na epoch 46.
+
+### Validação (silver, epoch 38, imagens avaliáveis)
+
+| Alvo | Imagens | Accuracy | Linha de base | Kappa quadrático |
+|---|---|---|---|---|
+| EXP | 301 | 0,661 | 0,558 | 0,812 |
+| ICM | 251 | 0,665 | 0,805 | 0,152 |
+| TE | 251 | 0,633 | 0,665 | 0,250 |
+
+### Teste (gold)
+
+| Alvo | Imagens | Accuracy | Linha de base | Kappa quadrático |
+|---|---|---|---|---|
+| EXP | 298 | 0,765 | 0,513 | 0,864 |
+| ICM | 238 | 0,609 | 0,643 | 0,251 |
+| TE | 234 | 0,585 | 0,521 | 0,429 |
+
+#### Por subconjunto de embriões
+
+| Alvo | Com imagens no silver: n | Accuracy | Kappa | Inéditos: n | Accuracy | Kappa |
+|---|---|---|---|---|---|---|
+| EXP | 240 | 0,796 | 0,888 | 58 | 0,638 | 0,790 |
+| ICM | 195 | 0,621 | 0,284 | 43 | 0,558 | 0,114 |
+| TE | 193 | 0,591 | 0,465 | 41 | 0,561 | 0,290 |
+
+#### Recall por classe
+
+| Classe | EXP | ICM | TE |
+|---|---|---|---|
+| 0 | 0,78 (23) | 0,69 (153) | 0,73 (122) |
+| 1 | 0,55 (31) | 0,59 (68) | 0,46 (82) |
+| 2 | 0,76 (86) | 0,00 (17) | 0,33 (30) |
+| 3 | 0,81 (153) | sem imagens | sem imagens |
+| 4 | 0,80 (5) | não existe | não existe |
+
+O número entre parênteses é a quantidade de imagens da classe.
+
+### Comparação entre os treinos (gold)
+
+| Treino | Backbone | EXP: accuracy | EXP: Kappa | ICM: accuracy | ICM: Kappa | TE: accuracy | TE: Kappa |
+|---|---|---|---|---|---|---|---|
+| Linha de base | Nenhum | 0,513 | 0 | 0,643 | 0 | 0,521 | 0 |
+| Treino 1 | Do zero | 0,664 | 0,701 | 0,382 | 0,094 | 0,470 | 0,083 |
+| Treino 2 | Do zero | 0,513 | 0,000 | 0,071 | 0,000 | 0,350 | 0,000 |
+| Treino 3 | Do zero | 0,436 | 0,756 | 0,550 | 0,143 | 0,440 | 0,146 |
+| Treino 4 | EfficientNetB0 | 0,765 | 0,864 | 0,609 | 0,251 | 0,585 | 0,429 |
+
+### Conclusões
+
+1. **O pré-treino no ImageNet ajudou neste problema.** Só o backbone mudou em relação ao Treino 3, e o Kappa subiu em todos os alvos: de 0,756 para 0,864 em EXP, de 0,143 para 0,251 em ICM e de 0,146 para 0,429 em TE. Uma única execução não mede a variação entre treinos, então os valores exatos têm incerteza.
+2. **O treino ficou mais estável e mais rápido.** A `val_loss` variou muito menos, e a execução levou cerca de 17 minutos, contra 45 do Treino 3.
+3. **EXP corrigiu boa parte da previsão excessiva da classe 4.** Pela precisão e pelo recall arredondados, a classe 4 é prevista em cerca de 22 imagens, contra mais de 100 no Treino 3. Só 5 pertencem a ela, então o excesso ainda existe.
+4. **ICM é o ponto mais fraco.** A accuracy fica abaixo da linha de base, o Kappa é baixo e ICM=2 segue sem acerto nas 17 imagens.
+5. **Os embriões compartilhados podem estar inflando os resultados.** Neste treino, os inéditos ficam abaixo em todos os alvos, por exemplo com accuracy de 0,638 contra 0,796 em EXP. Isso revê a leitura do Treino 1. O subconjunto é pequeno, mas os números dos inéditos são a estimativa mais conservadora.
+6. **O gold já foi consultado em quatro treinos.** Ele influenciou a escolha do próximo passo, então deixou de ser totalmente independente. Os próximos ajustes devem ser escolhidos pela validação.
+
+### Hipóteses para o próximo treino
+
+Ainda não testadas:
+
+- Treinar ICM e TE só com imagens avaliáveis, zerando o peso da classe 3 nessas saídas.
+- Fazer ajuste fino das últimas camadas da EfficientNetB0, com taxa de aprendizado baixa.
+- Aumentar a resolução da entrada, para preservar detalhes de ICM e TE.

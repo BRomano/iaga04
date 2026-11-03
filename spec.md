@@ -27,7 +27,7 @@ Dados publicados junto ao artigo de Kromp et al. (2023, *Sci Data*), já present
 
 ## Decisões de design
 
-1. **CNN construída do zero** (não transfer learning), alinhada ao conteúdo do curso: conv → ReLU → pooling → GlobalAveragePooling2D (em vez de Flatten, para reduzir parâmetros/overfitting) → denso → softmax.
+1. **CNN com backbone pré-treinado:** EfficientNetB0 do ImageNet, congelada, seguida de GlobalAveragePooling2D (em vez de Flatten, para reduzir parâmetros/overfitting) → denso → softmax. A CNN construída do zero foi usada nos Treinos 1 a 3 e superada no Treino 4 (ver `history_train.md`).
 2. **Modelo único multi-saída** (*multi-task*): um backbone convolucional compartilhado + 3 cabeças de classificação (softmax) — EXP (5 classes), ICM (4 classes), TE (4 classes). Mais eficiente que treinar 3 CNNs separadas e permite compartilhamento de features.
 3. **Entrega em notebook Jupyter** (`gardner_cnn.ipynb`, raiz do projeto), com células organizadas e gráficos seguindo paleta/estilo consistente.
 4. **Framework:** TensorFlow/Keras (`tf.keras.*`), instalado via pip no `.venv` local. Também `scikit-learn` (split por grupo, matriz de confusão, kappa).
@@ -46,10 +46,8 @@ Dados publicados junto ao artigo de Kromp et al. (2023, *Sci Data*), já present
 
 ```
 Input (168,224,3)  # altura, largura, canais
- → [Conv2D(32,3x3,relu) ×2 → BatchNorm → MaxPool2D]  # BatchNorm com momentum=0.9 em todos os blocos
- → [Conv2D(64,3x3,relu) ×2 → BatchNorm → MaxPool2D]
- → [Conv2D(128,3x3,relu) ×2 → BatchNorm → MaxPool2D]
- → [Conv2D(256,3x3,relu) → BatchNorm → MaxPool2D]
+ → Rescaling(255)  # a EfficientNet espera pixels de 0 a 255
+ → EfficientNetB0 (ImageNet, congelada)
  → GlobalAveragePooling2D
  → Dense(256, relu) → Dropout(0.5)
  → 3 cabeças:
