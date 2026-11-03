@@ -310,3 +310,89 @@ Ainda não testadas:
 - Treinar ICM e TE só com imagens avaliáveis, zerando o peso da classe 3 nessas saídas.
 - Fazer ajuste fino das últimas camadas da EfficientNetB0, com taxa de aprendizado baixa.
 - Aumentar a resolução da entrada, para preservar detalhes de ICM e TE.
+
+## Treino 5 (02/11/2026)
+
+**Resultado:** o melhor modelo até agora. ICM melhorou e passou da linha de base em accuracy. EXP e TE ficaram praticamente iguais ao Treino 4. O treino parou cedo, e ICM=2 segue sem acerto.
+
+### Mudanças em relação ao Treino 4
+
+| Item | Treino 4 | Treino 5 |
+|---|---|---|
+| Classe 3 de ICM/TE no treino | Treinada como uma classe | Peso 0 |
+| Pesos de classe de ICM/TE | Calculados com a classe 3 | Calculados só com imagens avaliáveis |
+| `val_loss` | Inclui a classe 3 de ICM/TE | Ignora a classe 3 de ICM/TE |
+
+O restante da configuração é igual. O registro por epoch está em `models/runs/treino5/training_log.csv`.
+
+A `val_loss` e a accuracy de validação exibidas durante o treino não são comparáveis às dos treinos anteriores, porque a classe 3 mudou de papel. A comparação abaixo usa as métricas de imagens avaliáveis e o gold.
+
+### Execução
+
+- **Epochs:** parou por early stopping na epoch 24; os pesos restaurados são os da epoch 16.
+- **Melhor `val_loss`:** 1,996 (epoch 16).
+- **Loss de treino:** caiu de 2,938 na epoch 1 para 1,460 na epoch 24.
+
+### Validação (silver, epoch 16, imagens avaliáveis)
+
+| Alvo | Imagens | Accuracy | Linha de base | Kappa quadrático | Kappa no Treino 4 |
+|---|---|---|---|---|---|
+| EXP | 301 | 0,618 | 0,558 | 0,799 | 0,812 |
+| ICM | 251 | 0,705 | 0,805 | 0,321 | 0,152 |
+| TE | 251 | 0,625 | 0,665 | 0,285 | 0,250 |
+
+### Teste (gold)
+
+| Alvo | Imagens | Accuracy | Linha de base | Kappa quadrático |
+|---|---|---|---|---|
+| EXP | 298 | 0,755 | 0,513 | 0,857 |
+| ICM | 238 | 0,660 | 0,643 | 0,326 |
+| TE | 234 | 0,590 | 0,521 | 0,427 |
+
+#### Por subconjunto de embriões
+
+| Alvo | Com imagens no silver: n | Accuracy | Kappa | Inéditos: n | Accuracy | Kappa |
+|---|---|---|---|---|---|---|
+| EXP | 240 | 0,771 | 0,879 | 58 | 0,690 | 0,787 |
+| ICM | 195 | 0,677 | 0,321 | 43 | 0,581 | 0,347 |
+| TE | 193 | 0,580 | 0,447 | 41 | 0,634 | 0,317 |
+
+#### Recall por classe
+
+| Classe | EXP | ICM | TE |
+|---|---|---|---|
+| 0 | 0,74 (23) | 0,75 (153) | 0,64 (122) |
+| 1 | 0,68 (31) | 0,63 (68) | 0,67 (82) |
+| 2 | 0,67 (86) | 0,00 (17) | 0,17 (30) |
+| 3 | 0,82 (153) | sem imagens | sem imagens |
+| 4 | 0,80 (5) | não existe | não existe |
+
+O número entre parênteses é a quantidade de imagens da classe.
+
+### Comparação entre os treinos (gold)
+
+| Treino | Backbone | EXP: accuracy | EXP: Kappa | ICM: accuracy | ICM: Kappa | TE: accuracy | TE: Kappa |
+|---|---|---|---|---|---|---|---|
+| Linha de base | Nenhum | 0,513 | 0 | 0,643 | 0 | 0,521 | 0 |
+| Treino 1 | Do zero | 0,664 | 0,701 | 0,382 | 0,094 | 0,470 | 0,083 |
+| Treino 2 | Do zero | 0,513 | 0,000 | 0,071 | 0,000 | 0,350 | 0,000 |
+| Treino 3 | Do zero | 0,436 | 0,756 | 0,550 | 0,143 | 0,440 | 0,146 |
+| Treino 4 | EfficientNetB0 | 0,765 | 0,864 | 0,609 | 0,251 | 0,585 | 0,429 |
+| Treino 5 | EfficientNetB0 | 0,755 | 0,857 | 0,660 | 0,326 | 0,590 | 0,427 |
+
+### Conclusões
+
+1. **Treinar só com imagens avaliáveis ajudou ICM.** O Kappa subiu de 0,251 para 0,326, e a accuracy de 0,609 para 0,660, acima da linha de base pela primeira vez. A validação aponta na mesma direção, de 0,152 para 0,321. Uma única execução não mede a variação entre treinos.
+2. **EXP e TE praticamente não mudaram.** As diferenças de EXP (0,864 para 0,857) e TE (0,429 para 0,427) são pequenas demais para indicar uma mudança real.
+3. **Os embriões inéditos também melhoraram em ICM e TE.** O Kappa passou de 0,114 para 0,347 em ICM e de 0,290 para 0,317 em TE. O subconjunto é pequeno, mas o resultado reforça a mudança.
+4. **As classes raras seguem sem solução.** ICM=2 continua sem acerto, e a recall de TE=2 caiu de 0,33 para 0,17. Com 12 e 40 imagens de treino, poucos exemplos limitam o que os pesos de classe conseguem fazer.
+5. **O treino pode ter parado cedo demais.** A melhor epoch foi a 16, a primeira que o early stopping considera, e ele parou na 24 com a loss de treino ainda caindo. Um `patience` maior pode mudar esse resultado.
+
+### Hipóteses para o próximo treino
+
+Ainda não testadas:
+
+- Aumentar o `patience` do early stopping.
+- Fazer ajuste fino das últimas camadas da EfficientNetB0, com taxa de aprendizado baixa.
+- Aumentar a resolução da entrada, para preservar detalhes de ICM e TE.
+- Remover ou corrigir a imagem `838_02.png`, que tem dois rótulos de EXP. O efeito de uma única imagem deve ser pequeno.

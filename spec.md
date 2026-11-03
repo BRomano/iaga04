@@ -13,7 +13,7 @@ Dados publicados junto ao artigo de Kromp et al. (2023, *Sci Data*), já present
 ## Dados
 
 - **2344 imagens** PNG, todas RGB, mesmo tamanho **512×384**.
-- **Treino (silver):** 2044 linhas, `Image;EXP_silver;ICM_silver;TE_silver`, sem valores ausentes. Cada linha é uma imagem. Rótulos anotados por **um único embriologista experiente**.
+- **Treino (silver):** 2044 linhas, `Image;EXP_silver;ICM_silver;TE_silver`, sem valores ausentes. Cada linha é uma imagem, com uma exceção: `838_02.png` aparece duas vezes, com EXP 3 e EXP 4. O arquivo `846_01.png` existe na pasta, mas não está em nenhum CSV. Rótulos anotados por **um único embriologista experiente**.
 - **Teste (gold):** 300 linhas, `Image;EXP_gold;ICM_gold;TE_gold;` (coluna extra `Unnamed: 4` vazia, descartada). Rótulos por **consenso de um consórcio internacional de embriologistas clínicos**. Contém valores ausentes e `'ND'` (not determined):
   - EXP_gold: 2 NaN de 300
   - ICM_gold: 54 `'ND'` + 8 NaN de 300
@@ -57,7 +57,7 @@ Input (168,224,3)  # altura, largura, canais
 ```
 
 - **Loss:** `sparse_categorical_crossentropy` em cada cabeça, `loss_weights` iguais (1.0 cada).
-- **Class weights:** calculados por alvo (`compute_class_weight`) e convertidos em `sample_weight` por amostra em cada saída (Keras multi-output não aceita `class_weight` dict diretamente). Limitados a no máximo 10, para que uma única imagem rara não domine o lote. Usados só no treino; a validação não tem pesos, para que a `val_loss` não fique dominada por poucas imagens raras (ICM=2 tem só 4 imagens na validação).
+- **Class weights:** calculados por alvo (`compute_class_weight`) e convertidos em `sample_weight` por amostra em cada saída (Keras multi-output não aceita `class_weight` dict diretamente). Limitados a no máximo 10, para que uma única imagem rara não domine o lote. Usados só no treino; a validação não tem pesos de classe, para que a `val_loss` não fique dominada por poucas imagens raras (ICM=2 tem só 4 imagens na validação). Em ICM e TE, a classe 3 recebe peso 0 no treino e na validação, e os pesos são calculados só com as imagens avaliáveis.
 - **Otimizador:** Adam (lr=3e-4).
 - **Callbacks:** `EarlyStopping` (patience=8, restore_best_weights, start_from_epoch=15), `ReduceLROnPlateau`, `ModelCheckpoint` salvando o melhor modelo em `models/gardner_cnn.keras`, `CSVLogger` salvando as métricas de cada epoch em `models/training_log.csv`.
 

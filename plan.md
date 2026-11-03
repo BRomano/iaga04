@@ -38,8 +38,8 @@ Acompanhamento da implementação descrita em `spec.md`.
 
 ## Status atual
 
-Treinos 1 a 4 concluídos, com resultados em `history_train.md`. O melhor até agora é o Treino 4, com EfficientNetB0 pré-treinada no ImageNet; EXP tem boa concordância, e ICM e TE ainda são os pontos fracos. Notebook executado, registro por epoch e resultados de cada treino são versionados, mesmo sem ser o melhor. Os modelos ficam fora do git, pois podem ser reproduzidos pelo código.
+Treinos 1 a 5 concluídos, com resultados em `history_train.md`. O melhor até agora é o Treino 5, com EfficientNetB0 pré-treinada no ImageNet e ICM/TE treinados só com imagens avaliáveis. ICM=2 e TE=2 ainda são os pontos fracos. Notebook executado, registro por epoch e resultados de cada treino são versionados, mesmo sem ser o melhor. Os modelos ficam fora do git, pois podem ser reproduzidos pelo código.
 
 ## Pendências de entrega
 
-Segundo `docs/DEEP LEARNING - INFORMAÇÕES SOBRE AVALIAÇÕES.pdf`, a entrega exige arquivo `.py`, link do Colab, vídeo de 5 a 7 min e Resumo Expandido de 4 a 5 folhas. O prazo indicado no PDF era 21/10/2026.
+Segundo `docs/DEEP LEARNING - INFORMAÇÕES SOBRE AVALIAÇÕES.pdf`, a entrega exige arquivo fonte (o notebook `gardner_cnn.ipynb` faz esse papel), link do Colab, vídeo de 5 a 7 min e Resumo Expandido de 4 a 5 folhas. O prazo no PDF era 21/10/2026, mas a entrega foi atualizada para 09/11/2026.
