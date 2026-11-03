@@ -38,7 +38,7 @@ Acompanhamento da implementação descrita em `spec.md`.
 
 ## Status atual
 
-Treinos 1 a 5 concluídos, com resultados em `history_train.md`. O melhor até agora é o Treino 5, com EfficientNetB0 pré-treinada no ImageNet e ICM/TE treinados só com imagens avaliáveis. ICM=2 e TE=2 ainda são os pontos fracos. Notebook executado, registro por epoch e resultados de cada treino são versionados, mesmo sem ser o melhor. Os modelos ficam fora do git, pois podem ser reproduzidos pelo código.
+Treinos 1 a 6 concluídos, com resultados em `history_train.md`. O melhor até agora, pela validação, é o Treino 6, com EfficientNetB0 pré-treinada no ImageNet e ICM/TE treinados só com imagens avaliáveis. A diferença para o Treino 5 é pequena e pode ser variação entre execuções. ICM=2 e TE=2 ainda são os pontos fracos. Notebook executado, registro por epoch e resultados de cada treino são versionados, mesmo sem ser o melhor. Os modelos ficam fora do git, pois podem ser reproduzidos pelo código.
 
 ## Pendências de entrega
 

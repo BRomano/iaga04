@@ -396,3 +396,91 @@ Ainda não testadas:
 - Fazer ajuste fino das últimas camadas da EfficientNetB0, com taxa de aprendizado baixa.
 - Aumentar a resolução da entrada, para preservar detalhes de ICM e TE.
 - Remover ou corrigir a imagem `838_02.png`, que tem dois rótulos de EXP. O efeito de uma única imagem deve ser pequeno.
+
+## Treino 6 (02/11/2026)
+
+**Resultado:** o melhor modelo até agora pela validação, por pouco. O ganho não veio do `patience`: com o valor antigo, o treino chegaria aos mesmos pesos. A diferença para o Treino 5 mostra principalmente a variação entre execuções.
+
+### Mudanças em relação ao Treino 5
+
+| Item | Treino 5 | Treino 6 |
+|---|---|---|
+| `patience` do `EarlyStopping` | 8 | 15 |
+
+O restante da configuração é igual. O registro por epoch está em `models/runs/treino6/training_log.csv`.
+
+A partir deste treino, a comparação e a escolha do modelo usam a validação. O gold continua registrado, mas foi consultado em todos os treinos, e por isso seus resultados podem estar levemente otimistas.
+
+### Execução
+
+- **Duração:** cerca de 15 minutos em CPU, incluindo as demais células do notebook.
+- **Epochs:** parou por early stopping na epoch 45; os pesos restaurados são os da epoch 30.
+- **Melhor `val_loss`:** 1,960 (epoch 30), contra 1,996 no Treino 5.
+- **Loss de treino:** caiu de 2,978 na epoch 1 para 1,352 na epoch 45.
+- **Taxa de aprendizado:** caiu de 0,0003 para 0,000038 até a epoch 40.
+- **Efeito do `patience`:** a partir da epoch 16, o maior intervalo entre melhoras da `val_loss` foi de 4 epochs, e nenhuma melhora veio depois da epoch 30. Com `patience=8`, esta execução pararia na epoch 38, com os mesmos pesos da epoch 30.
+
+### Validação (silver, epoch 30, imagens avaliáveis)
+
+| Alvo | Imagens | Accuracy | Linha de base | Kappa quadrático | Kappa no Treino 5 |
+|---|---|---|---|---|---|
+| EXP | 301 | 0,664 | 0,558 | 0,818 | 0,799 |
+| ICM | 251 | 0,701 | 0,805 | 0,350 | 0,321 |
+| TE | 251 | 0,633 | 0,665 | 0,295 | 0,285 |
+
+### Teste (gold)
+
+| Alvo | Imagens | Accuracy | Linha de base | Kappa quadrático |
+|---|---|---|---|---|
+| EXP | 298 | 0,765 | 0,513 | 0,864 |
+| ICM | 238 | 0,618 | 0,643 | 0,329 |
+| TE | 234 | 0,624 | 0,521 | 0,531 |
+
+#### Por subconjunto de embriões
+
+| Alvo | Com imagens no silver: n | Accuracy | Kappa | Inéditos: n | Accuracy | Kappa |
+|---|---|---|---|---|---|---|
+| EXP | 240 | 0,783 | 0,884 | 58 | 0,690 | 0,798 |
+| ICM | 195 | 0,621 | 0,318 | 43 | 0,605 | 0,383 |
+| TE | 193 | 0,622 | 0,540 | 41 | 0,634 | 0,480 |
+
+#### Recall por classe
+
+| Classe | EXP | ICM | TE |
+|---|---|---|---|
+| 0 | 0,74 (23) | 0,67 (153) | 0,70 (122) |
+| 1 | 0,61 (31) | 0,65 (68) | 0,61 (82) |
+| 2 | 0,73 (86) | 0,00 (17) | 0,37 (30) |
+| 3 | 0,82 (153) | sem imagens | sem imagens |
+| 4 | 0,80 (5) | não existe | não existe |
+
+O número entre parênteses é a quantidade de imagens da classe.
+
+### Comparação entre os treinos (gold)
+
+| Treino | Backbone | EXP: accuracy | EXP: Kappa | ICM: accuracy | ICM: Kappa | TE: accuracy | TE: Kappa |
+|---|---|---|---|---|---|---|---|
+| Linha de base | Nenhum | 0,513 | 0 | 0,643 | 0 | 0,521 | 0 |
+| Treino 1 | Do zero | 0,664 | 0,701 | 0,382 | 0,094 | 0,470 | 0,083 |
+| Treino 2 | Do zero | 0,513 | 0,000 | 0,071 | 0,000 | 0,350 | 0,000 |
+| Treino 3 | Do zero | 0,436 | 0,756 | 0,550 | 0,143 | 0,440 | 0,146 |
+| Treino 4 | EfficientNetB0 | 0,765 | 0,864 | 0,609 | 0,251 | 0,585 | 0,429 |
+| Treino 5 | EfficientNetB0 | 0,755 | 0,857 | 0,660 | 0,326 | 0,590 | 0,427 |
+| Treino 6 | EfficientNetB0 | 0,765 | 0,864 | 0,618 | 0,329 | 0,624 | 0,531 |
+
+### Conclusões
+
+1. **O `patience` não explica a melhora.** Esta execução nunca precisou de mais de 4 epochs para melhorar e terminaria com os mesmos pesos usando `patience=8`. O Treino 5 parou na epoch 24 porque sua execução ficou 8 epochs sem melhorar, o que aqui não aconteceu.
+2. **A variação entre execuções é grande.** A semente é a mesma, mas as curvas de `val_loss` já diferem desde a epoch 1, até 0,195 nas primeiras 24 epochs. Com configuração praticamente igual, o Kappa de TE no gold foi de 0,427 para 0,531. Por isso, diferenças desse tamanho entre treinos, inclusive nos anteriores, não bastam para concluir que uma mudança funcionou.
+3. **A validação indica melhora pequena.** Os três Kappas subiram, de 0,010 a 0,029. A melhora maior no gold, em TE, não apareceu na validação na mesma proporção (0,285 para 0,295).
+4. **ICM e TE seguem fracos.** Na validação, a accuracy de ICM (0,701) e de TE (0,633) continua abaixo da linha de base. No gold, a accuracy de ICM (0,618) também ficou abaixo. Só o Kappa mostra que há alguma ordem nas predições.
+5. **As classes raras seguem difíceis.** ICM=2 continua sem acerto. TE=2 subiu para 0,37 de recall, mas com apenas 30 imagens e sem saber quanto disso se repetiria em outra execução.
+6. **O treino agora chegou ao limite desta configuração.** A `val_loss` parou de melhorar por 15 epochs, mesmo com a taxa de aprendizado reduzida, enquanto a loss de treino seguia caindo. Com a EfficientNetB0 congelada, é pouco provável que mais epochs ajudem.
+
+### Hipóteses para o próximo treino
+
+Ainda não testadas:
+
+- Repetir a configuração com outras sementes, para medir a variação e comparar as mudanças com ela.
+- Fazer ajuste fino das últimas camadas da EfficientNetB0, com taxa de aprendizado baixa.
+- Aumentar a resolução da entrada, para preservar detalhes de ICM e TE.

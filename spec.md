@@ -59,7 +59,7 @@ Input (168,224,3)  # altura, largura, canais
 - **Loss:** `sparse_categorical_crossentropy` em cada cabeça, `loss_weights` iguais (1.0 cada).
 - **Class weights:** calculados por alvo (`compute_class_weight`) e convertidos em `sample_weight` por amostra em cada saída (Keras multi-output não aceita `class_weight` dict diretamente). Limitados a no máximo 10, para que uma única imagem rara não domine o lote. Usados só no treino; a validação não tem pesos de classe, para que a `val_loss` não fique dominada por poucas imagens raras (ICM=2 tem só 4 imagens na validação). Em ICM e TE, a classe 3 recebe peso 0 no treino e na validação, e os pesos são calculados só com as imagens avaliáveis.
 - **Otimizador:** Adam (lr=3e-4).
-- **Callbacks:** `EarlyStopping` (patience=8, restore_best_weights, start_from_epoch=15), `ReduceLROnPlateau`, `ModelCheckpoint` salvando o melhor modelo em `models/gardner_cnn.keras`, `CSVLogger` salvando as métricas de cada epoch em `models/training_log.csv`.
+- **Callbacks:** `EarlyStopping` (patience=15, restore_best_weights, start_from_epoch=15), `ReduceLROnPlateau`, `ModelCheckpoint` salvando o melhor modelo em `models/gardner_cnn.keras`, `CSVLogger` salvando as métricas de cada epoch em `models/training_log.csv`.
 
 ### Nota de implementação (Keras 3)
 
