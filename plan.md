@@ -38,7 +38,7 @@ Acompanhamento da implementação descrita em `spec.md`.
 
 ## Status atual
 
-Treinos 1 e 2 concluídos, com resultados em `history_train.md`. Nenhum dos dois gerou um modelo útil para ICM e TE; o melhor até agora é o do Treino 1, por causa de EXP. Treino 3 em andamento, com `momentum=0.9` no BatchNorm e `start_from_epoch=15` no early stopping. Notebook executado, registro por epoch e resultados de cada treino são versionados, mesmo sem ser o melhor. Os modelos ficam fora do git, pois podem ser reproduzidos pelo código.
+Treinos 1, 2 e 3 concluídos, com resultados em `history_train.md`. Nenhum gerou um modelo útil para ICM e TE; o Treino 3 tem os melhores valores de Kappa. O próximo é o Treino 4, com EfficientNetB0 pré-treinado no ImageNet. Notebook executado, registro por epoch e resultados de cada treino são versionados, mesmo sem ser o melhor. Os modelos ficam fora do git, pois podem ser reproduzidos pelo código.
 
 ## Pendências de entrega
 

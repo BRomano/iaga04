@@ -149,7 +149,7 @@ Ainda não testadas:
 
 ## Treino 3 (02/11/2026)
 
-**Situação:** em andamento.
+**Resultado:** o melhor Kappa nos três alvos até agora, mas ICM e TE continuam fracos. EXP perdeu accuracy porque passou a prever demais a classe 4.
 
 ### Mudanças em relação ao Treino 2
 
@@ -160,3 +160,68 @@ Ainda não testadas:
 | Modelo salvo ao final | Melhor checkpoint | Mesmo modelo avaliado no notebook |
 
 Os pesos de classe limitados a 10 e o `learning_rate` inicial de 0,0003 continuam iguais.
+
+Código: commit `3219941`. O registro por epoch está em `models/runs/treino3/training_log.csv`.
+
+### Execução
+
+- **Duração:** cerca de 45 minutos em CPU, incluindo as demais células do notebook.
+- **Epochs:** parou por early stopping na epoch 31; os pesos restaurados são os da epoch 23.
+- **Melhor `val_loss`:** 2,584 (epoch 23), a menor entre os três treinos.
+- **Variação da `val_loss`:** de 2,584 a 6,379. Da epoch 20 em diante, com a taxa de aprendizado já reduzida, ficou entre 2,584 e 2,916.
+- **Loss de treino:** caiu de 4,594 na epoch 1 para 2,287 na epoch 31.
+
+### Validação (silver, epoch 23, imagens avaliáveis)
+
+| Alvo | Imagens | Accuracy | Linha de base | Kappa quadrático |
+|---|---|---|---|---|
+| EXP | 301 | 0,442 | 0,558 | 0,778 |
+| ICM | 251 | 0,649 | 0,805 | 0,074 |
+| TE | 251 | 0,586 | 0,665 | 0,175 |
+
+### Teste (gold)
+
+| Alvo | Imagens | Accuracy | Linha de base | Kappa quadrático |
+|---|---|---|---|---|
+| EXP | 298 | 0,436 | 0,513 | 0,756 |
+| ICM | 238 | 0,550 | 0,643 | 0,143 |
+| TE | 234 | 0,440 | 0,521 | 0,146 |
+
+#### Por subconjunto de embriões
+
+| Alvo | Com imagens no silver: n | Accuracy | Kappa | Inéditos: n | Accuracy | Kappa |
+|---|---|---|---|---|---|---|
+| EXP | 240 | 0,438 | 0,752 | 58 | 0,431 | 0,768 |
+| ICM | 195 | 0,569 | 0,152 | 43 | 0,465 | 0,094 |
+| TE | 193 | 0,456 | 0,183 | 41 | 0,366 | -0,002 |
+
+#### Recall por classe
+
+| Classe | EXP | ICM | TE |
+|---|---|---|---|
+| 0 | 0,83 (23) | 0,70 (153) | 0,65 (122) |
+| 1 | 0,48 (31) | 0,35 (68) | 0,18 (82) |
+| 2 | 0,58 (86) | 0,00 (17) | 0,30 (30) |
+| 3 | 0,27 (153) | sem imagens | sem imagens |
+| 4 | 0,80 (5) | não existe | não existe |
+
+O número entre parênteses é a quantidade de imagens da classe.
+
+### Comparação entre os treinos (gold)
+
+| Treino | EXP: accuracy | EXP: Kappa | ICM: accuracy | ICM: Kappa | TE: accuracy | TE: Kappa |
+|---|---|---|---|---|---|---|
+| Linha de base | 0,513 | 0 | 0,643 | 0 | 0,521 | 0 |
+| Treino 1 | 0,664 | 0,701 | 0,382 | 0,094 | 0,470 | 0,083 |
+| Treino 2 | 0,513 | 0,000 | 0,071 | 0,000 | 0,350 | 0,000 |
+| Treino 3 | 0,436 | 0,756 | 0,550 | 0,143 | 0,440 | 0,146 |
+
+### Conclusões
+
+1. **O Kappa melhorou nos três alvos em relação ao Treino 1.** A melhora em ICM e TE é pequena, e os dois seguem com concordância fraca.
+2. **As mudanças resolveram o colapso do Treino 2.** O modelo deixou de prever uma única classe. Como o `momentum` do BatchNorm e o `start_from_epoch` mudaram juntos, não dá para separar o efeito de cada um.
+3. **A hipótese do BatchNorm ganhou força, mas não foi provada.** A accuracy de validação parou de ficar travada nos mesmos valores já nas primeiras epochs. Ela ainda oscilou bastante até a taxa de aprendizado cair.
+4. **EXP prevê demais a classe 4.** Pela precisão e pelo recall arredondados, a classe 4 é prevista em mais de 100 das 298 imagens, embora só 5 pertençam a ela. Por isso, a accuracy caiu para 0,436 e a recall da classe 3 ficou em 0,27. O Kappa alto mostra que muitos desses erros ficam perto da classe correta.
+5. **Nenhum alvo supera a linha de base em accuracy.** A escolha entre os modelos depende da métrica: o Treino 1 é melhor em accuracy de EXP, e o Treino 3 é melhor em todos os Kappas e na accuracy de ICM.
+6. **ICM=2 continua sem acerto.** A recall foi 0,00 nas 17 imagens, mesmo com o peso de classe de 10.
+7. **Embriões inéditos ficam um pouco abaixo em ICM e TE.** O subconjunto é pequeno, então isso não é conclusivo.
