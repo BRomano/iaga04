@@ -218,3 +218,16 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Projeto
+.claude/
+.venv/
+.idea/
+data/images/
+docs/*.pdf
+# Modelos podem ser reproduzidos pelo código e não são versionados
+*.keras
+# Arquivo de trabalho do treino atual; cada treino é arquivado em models/runs/
+models/training_log.csv
+# Treino 1 fica só localmente
+models/runs/treino1/
