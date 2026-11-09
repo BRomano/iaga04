@@ -27,7 +27,7 @@ Dados publicados junto ao artigo de Kromp et al. (2023, *Sci Data*), já present
 
 ## Decisões de design
 
-1. **CNN com backbone pré-treinado:** EfficientNetB0 do ImageNet, congelada, seguida de GlobalAveragePooling2D (em vez de Flatten, para reduzir parâmetros/overfitting) → denso → softmax. A CNN construída do zero foi usada nos Treinos 1 a 3 e superada no Treino 4 (ver `history_train.md`).
+1. **CNN com backbone pré-treinado:** EfficientNetB0 do ImageNet, congelada, seguida de GlobalAveragePooling2D (em vez de Flatten, para reduzir parâmetros/overfitting) → denso → softmax. A CNN construída do zero foi usada nos Treinos 1 a 3 e superada no Treino 4 (ver `history_train.md`). Depois da etapa congelada, um ajuste fino opcional (`FINE_TUNE=1`) libera `block7a` e `top_conv`, com BatchNorm congelada e lr 1e-5; ele só é mantido se reduzir a `val_loss`. No Treino 7, ele não mostrou ganho claro, e o modelo final é a rede congelada.
 2. **Modelo único multi-saída** (*multi-task*): um backbone convolucional compartilhado + 3 cabeças de classificação (softmax) — EXP (5 classes), ICM (4 classes), TE (4 classes). Mais eficiente que treinar 3 CNNs separadas e permite compartilhamento de features.
 3. **Entrega em notebook Jupyter** (`gardner_cnn.ipynb`, raiz do projeto), com células organizadas e gráficos seguindo paleta/estilo consistente.
 4. **Framework:** TensorFlow/Keras (`tf.keras.*`), instalado via pip no `.venv` local. Também `scikit-learn` (split por grupo, matriz de confusão, kappa).
@@ -60,6 +60,8 @@ Input (168,224,3)  # altura, largura, canais
 - **Class weights:** calculados por alvo (`compute_class_weight`) e convertidos em `sample_weight` por amostra em cada saída (Keras multi-output não aceita `class_weight` dict diretamente). Limitados a no máximo 10, para que uma única imagem rara não domine o lote. Usados só no treino; a validação não tem pesos de classe, para que a `val_loss` não fique dominada por poucas imagens raras (ICM=2 tem só 4 imagens na validação). Em ICM e TE, a classe 3 recebe peso 0 no treino e na validação, e os pesos são calculados só com as imagens avaliáveis.
 - **Otimizador:** Adam (lr=3e-4).
 - **Callbacks:** `EarlyStopping` (patience=15, restore_best_weights, start_from_epoch=15), `ReduceLROnPlateau`, `ModelCheckpoint` salvando o melhor modelo em `models/gardner_cnn.keras`, `CSVLogger` salvando as métricas de cada epoch em `models/training_log.csv`.
+- **Ajuste fino:** até 30 epochs, `EarlyStopping` com patience=8, `ReduceLROnPlateau` e `CSVLogger` em modo de acréscimo.
+- **Execuções repetidas:** as variáveis de ambiente `TRAIN_SEED` (semente do treino; o split usa sempre `SEED=42`), `FINE_TUNE` e `MODELS_DIR` permitem rodar o notebook com outras sementes, e cada execução grava `metrics.json` com o resumo das métricas.
 
 ### Nota de implementação (Keras 3)
 

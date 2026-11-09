@@ -1,0 +1,135 @@
+{
+ "train_seed": 42,
+ "fine_tune": true,
+ "fine_tune_kept": false,
+ "frozen_epochs": 35,
+ "total_epochs": 50,
+ "frozen_val_loss": 1.9166091680526733,
+ "final_val_loss": 1.9166091680526733,
+ "validation": [
+  {
+   "alvo": "EXP",
+   "n_avaliaveis": 301,
+   "accuracy": 0.6445182724252492,
+   "linha_de_base": 0.5581395348837209,
+   "kappa_quadratico": 0.8090402163698894
+  },
+  {
+   "alvo": "ICM",
+   "n_avaliaveis": 251,
+   "accuracy": 0.7370517928286853,
+   "linha_de_base": 0.8047808764940239,
+   "kappa_quadratico": 0.3682194579214242
+  },
+  {
+   "alvo": "TE",
+   "n_avaliaveis": 251,
+   "accuracy": 0.649402390438247,
+   "linha_de_base": 0.6653386454183267,
+   "kappa_quadratico": 0.30920338341118536
+  }
+ ],
+ "validation_recall": {
+  "EXP": {
+   "0": 0.7586206896551724,
+   "1": 0.5238095238095238,
+   "2": 0.7321428571428571,
+   "3": 0.6666666666666666,
+   "4": 0.2962962962962963
+  },
+  "ICM": {
+   "0": 0.7722772277227723,
+   "1": 0.6444444444444445,
+   "2": 0.0
+  },
+  "TE": {
+   "0": 0.718562874251497,
+   "1": 0.5584415584415584,
+   "2": 0.0
+  }
+ },
+ "gold": [
+  {
+   "subconjunto": "todos",
+   "alvo": "EXP",
+   "n": 298,
+   "accuracy": 0.761744966442953,
+   "kappa_quadratico": 0.8625556349883541
+  },
+  {
+   "subconjunto": "todos",
+   "alvo": "ICM",
+   "n": 238,
+   "accuracy": 0.6680672268907563,
+   "kappa_quadratico": 0.300678952473327
+  },
+  {
+   "subconjunto": "todos",
+   "alvo": "TE",
+   "n": 234,
+   "accuracy": 0.6495726495726496,
+   "kappa_quadratico": 0.48097350535183747
+  },
+  {
+   "subconjunto": "embrião presente no silver",
+   "alvo": "EXP",
+   "n": 240,
+   "accuracy": 0.7708333333333334,
+   "kappa_quadratico": 0.8754293911139632
+  },
+  {
+   "subconjunto": "embrião presente no silver",
+   "alvo": "ICM",
+   "n": 195,
+   "accuracy": 0.6820512820512821,
+   "kappa_quadratico": 0.2941919191919192
+  },
+  {
+   "subconjunto": "embrião presente no silver",
+   "alvo": "TE",
+   "n": 193,
+   "accuracy": 0.6528497409326425,
+   "kappa_quadratico": 0.5125538552963897
+  },
+  {
+   "subconjunto": "embrião inédito",
+   "alvo": "EXP",
+   "n": 58,
+   "accuracy": 0.7241379310344828,
+   "kappa_quadratico": 0.820943442825389
+  },
+  {
+   "subconjunto": "embrião inédito",
+   "alvo": "ICM",
+   "n": 43,
+   "accuracy": 0.6046511627906976,
+   "kappa_quadratico": 0.3384615384615385
+  },
+  {
+   "subconjunto": "embrião inédito",
+   "alvo": "TE",
+   "n": 41,
+   "accuracy": 0.6341463414634146,
+   "kappa_quadratico": 0.31950207468879666
+  }
+ ],
+ "gold_recall": {
+  "EXP": {
+   "0": 0.782608695652174,
+   "1": 0.6129032258064516,
+   "2": 0.7209302325581395,
+   "3": 0.8104575163398693,
+   "4": 0.8
+  },
+  "ICM": {
+   "0": 0.7908496732026143,
+   "1": 0.5588235294117647,
+   "2": 0.0
+  },
+  "TE": {
+   "0": 0.7295081967213115,
+   "1": 0.6341463414634146,
+   "2": 0.36666666666666664
+  }
+ }
+}

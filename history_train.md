@@ -484,3 +484,113 @@ Ainda não testadas:
 - Repetir a configuração com outras sementes, para medir a variação e comparar as mudanças com ela.
 - Fazer ajuste fino das últimas camadas da EfficientNetB0, com taxa de aprendizado baixa.
 - Aumentar a resolução da entrada, para preservar detalhes de ICM e TE.
+
+## Treino 7 (03/11/2026)
+
+**Resultado:** o ajuste fino não trouxe ganho claro. Ele só reduziu a `val_loss` em 1 de 3 sementes, e a diferença média para a rede congelada é menor que a variação entre sementes. O modelo escolhido pela validação é o da semente 42, em que o ajuste fino foi descartado e ficou a rede congelada.
+
+### Mudanças em relação ao Treino 6
+
+| Item | Treino 6 | Treino 7 |
+|---|---|---|
+| Ajuste fino | Não | Sim: `block7a` e `top_conv` liberados, BatchNorm congelada, lr 1e-5, até 30 epochs, `patience=8` |
+| Regra de escolha | — | Se o ajuste fino não reduzir a `val_loss`, o modelo volta aos pesos da etapa congelada |
+| Sementes | 42 | 42, 1 e 2 (`TRAIN_SEED`); o split continua fixo em `SEED=42` |
+
+A etapa congelada é igual ao Treino 6. O notebook passou a aceitar as variáveis de ambiente `TRAIN_SEED`, `FINE_TUNE` e `MODELS_DIR` e a gravar um `metrics.json` com o resumo da execução. Os registros estão em `models/runs/treino7/<execução>/`.
+
+### Execução
+
+Cada execução levou de 20 a 25 minutos em CPU. A fila previa mais duas execuções sem ajuste fino (`frozen_seed1` e `frozen_seed2`), mas foi interrompida em 03/11, na epoch 17 de `frozen_seed1`, quando o computador desligou. Essas execuções não foram refeitas por causa do prazo. O registro parcial de `frozen_seed1` está em `models/runs/treino7/frozen_seed1/training_log.csv`, mas não entra na comparação.
+
+| Execução | Melhor epoch congelada | `val_loss` congelada | Melhor `val_loss` no ajuste fino | Ajuste fino mantido | Epochs |
+|---|---|---|---|---|---|
+| Semente 42 | 20 | 1,917 | 1,986 | Não | 50 |
+| Semente 1 | 21 | 1,939 | 1,979 | Não | 54 |
+| Semente 2 | 48 | 1,959 | 1,922 | Sim | 72 |
+
+### Validação (silver, imagens avaliáveis)
+
+| Execução | `val_loss` final | EXP: accuracy | EXP: Kappa | ICM: accuracy | ICM: Kappa | TE: accuracy | TE: Kappa |
+|---|---|---|---|---|---|---|---|
+| Treino 6 (congelada, semente 42) | 1,960 | 0,664 | 0,818 | 0,701 | 0,350 | 0,633 | 0,295 |
+| Semente 42 (congelada) | 1,917 | 0,645 | 0,809 | 0,737 | 0,368 | 0,649 | 0,309 |
+| Semente 1 (congelada) | 1,939 | 0,658 | 0,809 | 0,669 | 0,247 | 0,661 | 0,319 |
+| Semente 2 (ajuste fino) | 1,922 | 0,654 | 0,815 | 0,729 | 0,350 | 0,673 | 0,345 |
+| Linha de base | — | 0,558 | 0 | 0,805 | 0 | 0,665 | 0 |
+
+#### Comparação entre ajuste fino e rede congelada
+
+| Configuração | Amostras | `val_loss` média | Desvio padrão |
+|---|---|---|---|
+| Só a rede congelada | Treino 6 e etapa congelada das sementes 42, 1 e 2 | 1,944 | 0,021 |
+| Com ajuste fino e a regra de escolha | Sementes 42, 1 e 2 | 1,926 | 0,012 |
+
+A diferença média é de 0,018, menor que o desvio padrão da rede congelada. Ela também vem só da semente 2, e a regra de escolha usa a própria validação, o que favorece a configuração com ajuste fino.
+
+### Teste (gold), modelo escolhido (semente 42)
+
+| Alvo | Imagens | Accuracy | Linha de base | Kappa quadrático |
+|---|---|---|---|---|
+| EXP | 298 | 0,762 | 0,513 | 0,863 |
+| ICM | 238 | 0,668 | 0,643 | 0,301 |
+| TE | 234 | 0,650 | 0,521 | 0,481 |
+
+#### Por subconjunto de embriões
+
+| Alvo | Com imagens no silver: n | Accuracy | Kappa | Inéditos: n | Accuracy | Kappa |
+|---|---|---|---|---|---|---|
+| EXP | 240 | 0,771 | 0,875 | 58 | 0,724 | 0,821 |
+| ICM | 195 | 0,682 | 0,294 | 43 | 0,605 | 0,338 |
+| TE | 193 | 0,653 | 0,513 | 41 | 0,634 | 0,320 |
+
+#### Recall por classe
+
+| Classe | EXP | ICM | TE |
+|---|---|---|---|
+| 0 | 0,78 (23) | 0,79 (153) | 0,73 (122) |
+| 1 | 0,61 (31) | 0,56 (68) | 0,63 (82) |
+| 2 | 0,72 (86) | 0,00 (17) | 0,37 (30) |
+| 3 | 0,81 (153) | sem imagens | sem imagens |
+| 4 | 0,80 (5) | não existe | não existe |
+
+O número entre parênteses é a quantidade de imagens da classe.
+
+#### Gold das três sementes
+
+Só registrado; não foi usado na escolha.
+
+| Execução | EXP: accuracy | EXP: Kappa | ICM: accuracy | ICM: Kappa | TE: accuracy | TE: Kappa |
+|---|---|---|---|---|---|---|
+| Semente 42 | 0,762 | 0,863 | 0,668 | 0,301 | 0,650 | 0,481 |
+| Semente 1 | 0,772 | 0,869 | 0,613 | 0,276 | 0,637 | 0,482 |
+| Semente 2 | 0,765 | 0,863 | 0,643 | 0,315 | 0,624 | 0,444 |
+
+### Comparação entre os treinos (gold)
+
+| Treino | Backbone | EXP: accuracy | EXP: Kappa | ICM: accuracy | ICM: Kappa | TE: accuracy | TE: Kappa |
+|---|---|---|---|---|---|---|---|
+| Linha de base | Nenhum | 0,513 | 0 | 0,643 | 0 | 0,521 | 0 |
+| Treino 1 | Do zero | 0,664 | 0,701 | 0,382 | 0,094 | 0,470 | 0,083 |
+| Treino 2 | Do zero | 0,513 | 0,000 | 0,071 | 0,000 | 0,350 | 0,000 |
+| Treino 3 | Do zero | 0,436 | 0,756 | 0,550 | 0,143 | 0,440 | 0,146 |
+| Treino 4 | EfficientNetB0 | 0,765 | 0,864 | 0,609 | 0,251 | 0,585 | 0,429 |
+| Treino 5 | EfficientNetB0 | 0,755 | 0,857 | 0,660 | 0,326 | 0,590 | 0,427 |
+| Treino 6 | EfficientNetB0 | 0,765 | 0,864 | 0,618 | 0,329 | 0,624 | 0,531 |
+| Treino 7 (semente 42) | EfficientNetB0 | 0,762 | 0,863 | 0,668 | 0,301 | 0,650 | 0,481 |
+
+### Conclusões
+
+1. **O ajuste fino não mostrou ganho claro.** Ele piorou a `val_loss` nas sementes 42 e 1, e o modelo voltou aos pesos congelados. Só melhorou na semente 2, justamente a que terminou a etapa congelada com a pior `val_loss` (1,959), e mesmo assim não superou a melhor rede congelada (1,917).
+2. **A variação entre sementes é grande.** Com a mesma configuração congelada, a `val_loss` foi de 1,917 a 1,960, e o Kappa de ICM na validação foi de 0,247 a 0,368. Diferenças desse tamanho não indicam, sozinhas, que uma mudança funcionou.
+3. **O modelo final é a rede congelada da semente 42.** Ela tem a menor `val_loss`. No gold, os Kappas ficam próximos dos Treinos 5 e 6, com variação dentro do esperado entre execuções.
+4. **ICM e TE seguem fracos e as classes raras sem solução.** Na validação, a accuracy de ICM continua abaixo da linha de base. ICM=2 segue sem acerto, e TE=2 tem recall de 0,37 no gold e 0 na validação.
+5. **A comparação ficou incompleta.** Faltaram as execuções `frozen_seed1` e `frozen_seed2`. A etapa congelada das três sementes cumpre o mesmo papel, mas o Treino 6 e a semente 42 usam a mesma semente e não são amostras totalmente independentes.
+
+### Hipóteses para trabalhos futuros
+
+Ainda não testadas:
+
+- Ajuste fino com mais camadas liberadas ou com taxa de aprendizado menor, comparado com mais sementes.
+- Aumentar a resolução da entrada, para preservar detalhes de ICM e TE.
+- Regressão ordinal (CORAL/CORN) e agregação das imagens de cada embrião.
